@@ -58,7 +58,7 @@
     <div class="container">
      <img src="aust-l.png" />
      <!-- <div class="centered">33.3 million kWh</div> -->
-     <div class="centered">33.3 TWh</div>
+     <div class="centered" id="total_power"></div>
     </div>
     <!-- <div class="bodypanel">
       <div class="auto-resize-square">
@@ -74,7 +74,6 @@
 
 
   var xhr = new XMLHttpRequest();
-  //xhr.open('GET', 'https://drive.google.com/open?id=1UseRr2bdGD0Qs43Skzz7pABWko-8OGuU', true);
   xhr.open('GET', 'data_total.txt', true);
   xhr.responseType = 'blob';
 
@@ -84,8 +83,8 @@
       var blob = new Blob([this.response], {type: 'text/plain'});
 
       var text = document.createTextNode(blob);
+      var paragraph = document.getElementById("total_power");
       paragraph.appendChild(text);
-      var paragraph = document.getElementById("grid");
     }
   };
 
