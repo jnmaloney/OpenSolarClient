@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<meta charset="utf-8">
 <html lang="en" >
 <head>
   <style>
@@ -55,7 +56,7 @@
   </div>
   <!-- Column 2 -->
   <div>
-    <div class="container">
+    <div class="container" id="total">
      <img src="aust-l.png" />
      <!-- <div class="centered">33.3 million kWh</div> -->
      <div class="centered" id="total_power"></div>
@@ -64,37 +65,119 @@
       <div class="auto-resize-square">
       </div>
     </div> -->
+    <div class="container" id="state">
+      <canvas id="myChart"></canvas>
+    </div>
   </div>
   <!-- Column 3 -->
   <div>
-    <canvas class="rightpanel"></canvas>
+    <!-- <canvas class="rightpanel"></canvas> -->
+    <div class="rightpanel">
+      <div>
+        <p>Total solar power generated in Australia during the 24 hour period of 23-Jan-2020.</p>
+        <p><a onclick="show_state()">Show Data by State</a></p>
+      </div>
+      <div>
+        <p>Total solar power generated in Australia during the 24 hour period of 23-Jan-2020.</p>
+        <p><a onclick="show_total()">Show Total Data</a></p>
+      </div>
+    </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
 <script>
+var show_state = function(power) {
+  document.getElementById('state').style.display = 'block';
+  document.getElementById('total').style.display = 'none';
+};
 
+var show_total = function(power) {
+  document.getElementById('state').style.display = 'none';
+  document.getElementById('total').style.display = 'block';
+};
+show_total();
 
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'data_total.txt', true);
-  xhr.responseType = 'blob';
+var setTotalPower = function(power) {
 
-  xhr.onload = function(e) {
-    if (this.status == 200) {
-      // Note: .response instead of .responseText
-      var blob = new Blob([this.response], {type: 'text/plain'});
+  //
+  // Format string and display total daily power in TWh
+  //
+  var power_value = (power*1e-6).toLocaleString(
+    undefined, // leave undefined to use the browser's locale,
+               // or use a string like 'en-US' to override it.
+    { maximumFractionDigits: 1 ,
+      minimumFractionDigits: 1 }
+  );
+  power_value += " TWh"
 
-      var fileReader = new FileReader();
-      fileReader.readAsText(blob);
-      fileReader.onload = function(event) {
-        let arrayBuffer = fileReader.result;
-        var text = document.createTextNode(arrayBuffer);
-        var paragraph = document.getElementById("total_power");
-        paragraph.appendChild(text);
-      };
+  var text = document.createTextNode(power_value);
+  var paragraph = document.getElementById("total_power");
+  paragraph.appendChild(text);
+};
 
-    }
+var g_data = [];
+var setStatePower = function(power) {
+
+  g_data = power.split("\n");
+
+  createChart();
+};
+
+var createChart = function(power) {
+
+  //
+  // Chart
+  //
+  var ctx = document.getElementById('myChart').getContext('2d');
+  var chart = new Chart(ctx, {
+      // The type of chart we want to create
+      type: 'bar',
+
+      // The data for our dataset
+      data: {
+          labels: ['ACT', 'NSW', 'QLD', 'NT', 'SA', 'TAS', 'VIC', 'WA'],
+          datasets: [{
+              label: '',
+              backgroundColor: 'rgb(255, 99, 132)',
+              borderColor: 'rgb(255, 99, 132)',
+              //data: [0.440, 11.24, 8.523, .18, 4.7, .2, 6.65, 1.27] // Daily state data
+              data: g_data
+          }]
+      },
+
+      // Configuration options go here
+      options: {
+        legend: {
+          display: false,
+        },
+        title: {
+          display: true,
+          text: 'Daily solar power contribution (TWh) by state on 23-Jan-2020'
+        }
+      }
+  });
+};
+
+    var loadTextFile = function(filename, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', filename, true);
+    xhr.responseType = 'blob';
+
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+        var blob = new Blob([this.response], {type: 'text/plain'});
+        var fileReader = new FileReader();
+        fileReader.readAsText(blob);
+        fileReader.onload = function(event) {
+          callback(fileReader.result);
+        };
+      }
+    };
+    xhr.send();
   };
-
-  xhr.send();
+  loadTextFile('data_total.txt', setTotalPower);
+  loadTextFile('data_state.txt', setStatePower);
+  setTotalPower(33316972);
 
 </script>
 </body>
