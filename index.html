@@ -86,11 +86,11 @@
       fileReader.readAsArrayBuffer(blob);
       fileReader.onload = function(event) {
         let arrayBuffer = fileReader.result;
+        var text = document.createTextNode(arrayBuffer);
+        var paragraph = document.getElementById("total_power");
+        paragraph.appendChild(text);
       };
 
-      var text = document.createTextNode(arrayBuffer);
-      var paragraph = document.getElementById("total_power");
-      paragraph.appendChild(text);
     }
   };
 
