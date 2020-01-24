@@ -82,7 +82,13 @@
       // Note: .response instead of .responseText
       var blob = new Blob([this.response], {type: 'text/plain'});
 
-      var text = document.createTextNode(blob);
+      var fileReader = new FileReader();
+      fileReader.readAsArrayBuffer(blob);
+      fileReader.onload = function(event) {
+        let arrayBuffer = fileReader.result;
+      };
+
+      var text = document.createTextNode(arrayBuffer);
       var paragraph = document.getElementById("total_power");
       paragraph.appendChild(text);
     }
